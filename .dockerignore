@@ -1,0 +1,6 @@
+*
+!src
+!scripts
+!requirements.txt
+!inference.py
+!server.py
