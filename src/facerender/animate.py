@@ -7,7 +7,7 @@ from skimage import img_as_ubyte
 import safetensors
 import safetensors.torch 
 warnings.filterwarnings('ignore')
-
+import time
 
 import imageio
 import torch
@@ -23,6 +23,8 @@ from pydub import AudioSegment
 from src.utils.face_enhancer import enhancer_generator_with_len, enhancer_list
 from src.utils.paste_pic import paste_pic
 from src.utils.videoio import save_video_with_watermark
+
+from functools import lru_cache
 
 try:
     import webui  # in webui
@@ -154,7 +156,10 @@ class AnimateFromCoeff():
 
         return checkpoint['epoch']
 
-    def generate(self, x, video_save_dir, pic_path, crop_info, enhancer=None, background_enhancer=None, preprocess='crop', img_size=256):
+    def generate(self, x, video_save_dir, pic_path, crop_info, seed_video_path, enhancer=None, background_enhancer=None, preprocess='crop', img_size=256):
+        print(f"Seed Video Path is  {seed_video_path}  ") 
+
+        start_t = time.time()
 
         source_image=x['source_image'].type(torch.FloatTensor)
         source_semantics=x['source_semantics'].type(torch.FloatTensor)
@@ -162,6 +167,10 @@ class AnimateFromCoeff():
         source_image=source_image.to(self.device)
         source_semantics=source_semantics.to(self.device)
         target_semantics=target_semantics.to(self.device)
+
+        tracker_t = time.time()
+        print(f"Generating video - Step-1 {tracker_t - start_t} seconds") 
+
         if 'yaw_c_seq' in x:
             yaw_c_seq = x['yaw_c_seq'].type(torch.FloatTensor)
             yaw_c_seq = x['yaw_c_seq'].to(self.device)
@@ -180,33 +189,44 @@ class AnimateFromCoeff():
 
         frame_num = x['frame_num']
 
-        predictions_video = make_animation(source_image, source_semantics, target_semantics,
-                                        self.generator, self.kp_extractor, self.he_estimator, self.mapping, 
-                                        yaw_c_seq, pitch_c_seq, roll_c_seq, use_exp = True)
+        if seed_video_path != 'XXX':
+            print("No need to make animation")        
+            video_save_dir = seed_video_path
+        else:
+            print("We need to make animation")        
+            predictions_video = make_animation(source_image, source_semantics, target_semantics,
+                                            self.generator, self.kp_extractor, self.he_estimator, self.mapping, 
+                                            yaw_c_seq, pitch_c_seq, roll_c_seq, use_exp = True)
 
-        predictions_video = predictions_video.reshape((-1,)+predictions_video.shape[2:])
-        predictions_video = predictions_video[:frame_num]
+            tracker_t = time.time()
+            print(f"Generating video - Step-3 {tracker_t - start_t} seconds") 
 
-        video = []
-        for idx in range(predictions_video.shape[0]):
-            image = predictions_video[idx]
-            image = np.transpose(image.data.cpu().numpy(), [1, 2, 0]).astype(np.float32)
-            video.append(image)
-        result = img_as_ubyte(video)
+            predictions_video = predictions_video.reshape((-1,)+predictions_video.shape[2:])
+            predictions_video = predictions_video[:frame_num]
 
-        ### the generated video is 256x256, so we keep the aspect ratio, 
-        original_size = crop_info[0]
-        if original_size:
-            result = [ cv2.resize(result_i,(img_size, int(img_size * original_size[1]/original_size[0]) )) for result_i in result ]
-        
-        video_name = x['video_name']  + '.mp4'
-        path = os.path.join(video_save_dir, 'temp_'+video_name)
-        
-        imageio.mimsave(path, result,  fps=float(25))
+            video = []
+            for idx in range(predictions_video.shape[0]):
+                image = predictions_video[idx]
+                image = np.transpose(image.data.cpu().numpy(), [1, 2, 0]).astype(np.float32)
+                video.append(image)
+            result = img_as_ubyte(video)
 
-        av_path = os.path.join(video_save_dir, video_name)
-        return_path = av_path 
-        
+            ### the generated video is 256x256, so we keep the aspect ratio, 
+            original_size = crop_info[0]
+            if original_size:
+                result = [ cv2.resize(result_i,(img_size, int(img_size * original_size[1]/original_size[0]) )) for result_i in result ]
+
+            video_name = x['video_name']  + '.mp4'
+            path = os.path.join(video_save_dir, 'temp_'+video_name)
+            
+            imageio.mimsave(path, result,  fps=float(25))
+
+            av_path = os.path.join(video_save_dir, video_name)
+            return_path = av_path 
+            print(f"After Step 3 Video Name is {video_name} and Video Path is {video_save_dir}  ") 
+            print(f"After Step 3 av_path is {av_path}  ") 
+
+
         audio_path =  x['audio_path'] 
         audio_name = os.path.splitext(os.path.split(audio_path)[-1])[0]
         new_audio_path = os.path.join(video_save_dir, audio_name+'.wav')
@@ -219,8 +239,12 @@ class AnimateFromCoeff():
         word = word1[start_time:end_time]
         word.export(new_audio_path, format="wav")
 
+        tracker_t = time.time()
+        print(f"Generating video - Step-4 {tracker_t - start_t} seconds") 
+
         save_video_with_watermark(path, new_audio_path, av_path, watermark= False)
         print(f'The generated video is named {video_save_dir}/{video_name}') 
+
 
         if 'full' in preprocess.lower():
             # only add watermark to the full image.
@@ -232,6 +256,9 @@ class AnimateFromCoeff():
         else:
             full_video_path = av_path 
 
+        tracker_t = time.time()
+        print(f"Generating video - Step-5 {tracker_t - start_t} seconds") 
+
         #### paste back then enhancers
         if enhancer:
             video_name_enhancer = x['video_name']  + '_enhanced.mp4'
@@ -239,19 +266,28 @@ class AnimateFromCoeff():
             av_path_enhancer = os.path.join(video_save_dir, video_name_enhancer) 
             return_path = av_path_enhancer
 
+            tracker_t = time.time()
+            print(f"Generating video - Step-13 {tracker_t - start_t} seconds") 
+
             try:
                 enhanced_images_gen_with_len = enhancer_generator_with_len(full_video_path, method=enhancer, bg_upsampler=background_enhancer)
                 imageio.mimsave(enhanced_path, enhanced_images_gen_with_len, fps=float(25))
             except:
                 enhanced_images_gen_with_len = enhancer_list(full_video_path, method=enhancer, bg_upsampler=background_enhancer)
                 imageio.mimsave(enhanced_path, enhanced_images_gen_with_len, fps=float(25))
+
+            tracker_t = time.time()
+            print(f"Generating video - Step-14 {tracker_t - start_t} seconds") 
             
             save_video_with_watermark(enhanced_path, new_audio_path, av_path_enhancer, watermark= False)
             print(f'The generated video is named {video_save_dir}/{video_name_enhancer}')
-            os.remove(enhanced_path)
+            #os.remove(enhanced_path)
 
-        os.remove(path)
-        os.remove(new_audio_path)
+            tracker_t = time.time()
+            print(f"Generating video - Step-15 {tracker_t - start_t} seconds") 
+
+        #os.remove(path)
+        #os.remove(new_audio_path)
 
         return return_path
 
