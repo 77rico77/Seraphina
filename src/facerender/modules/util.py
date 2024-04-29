@@ -26,7 +26,7 @@ def kp2gaussian(kp, spatial_size, kp_variance):
     shape = mean.shape[:number_of_leading_dimensions] + (1, 1, 1, 3)
     mean = mean.view(*shape)
 
-    mean_sub = (coordinate_grid - mean)
+    mean_sub = (coordinate_grid - mean.to(coordinate_grid.device))
 
     out = torch.exp(-0.5 * (mean_sub ** 2).sum(-1) / kp_variance)
 
@@ -53,6 +53,9 @@ def make_coordinate_grid_2d(spatial_size, type):
 
 def make_coordinate_grid(spatial_size, type):
     d, h, w = spatial_size
+
+    if torch.backends.mps.is_available():
+        type = torch.float
     x = torch.arange(w).type(type)
     y = torch.arange(h).type(type)
     z = torch.arange(d).type(type)
