@@ -38,4 +38,4 @@ def save_video_with_watermark(video, audio, save_path, watermark=False):
 
         cmd = r'ffmpeg -y -hide_banner -loglevel error -i "%s" -i "%s" -filter_complex "[1]scale=100:-1[wm];[0][wm]overlay=(main_w-overlay_w)-10:10" "%s"' % (temp_file, watarmark_path, save_path)
         os.system(cmd)
-        os.remove(temp_file)
+        #os.remove(temp_file)

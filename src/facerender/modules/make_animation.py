@@ -98,6 +98,17 @@ def keypoint_transformation(kp_canonical, he, wo_exp=False):
     return {'value': kp_transformed}
 
 
+def make_kp_detector_ready(source_image, source_semantics, kp_detector, mapping):
+    with torch.no_grad():
+        kp_canonical = kp_detector(source_image)
+    return kp_canonical
+    
+
+def make_kp_detector_ready(source_semantics, mapping):
+    with torch.no_grad():
+        he_source = mapping(source_semantics)
+    return he_source
+
 
 def make_animation(source_image, source_semantics, target_semantics,
                             generator, kp_detector, he_estimator, mapping, 
@@ -112,7 +123,8 @@ def make_animation(source_image, source_semantics, target_semantics,
     
         for frame_idx in tqdm(range(target_semantics.shape[1]), 'Face Renderer:'):
             # still check the dimension
-            # print(target_semantics.shape, source_semantics.shape)
+            print(target_semantics.shape, source_semantics.shape)
+            #print("frame_idx - ", frame_idx)
             target_semantics_frame = target_semantics[:, frame_idx]
             he_driving = mapping(target_semantics_frame)
             if yaw_c_seq is not None:
