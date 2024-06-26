@@ -10,6 +10,8 @@ conda activate sadtalker
 # install pytorch 2.0
 pip install torch torchvision torchaudio
 conda install ffmpeg
+# For Mac this is a required setup to avoid wheel installation going into a never ending state
+pip install --upgrade pip setuptools wheel 
 pip install -r requirements.txt
 pip install dlib # macOS needs to install the original dlib.
 ```
