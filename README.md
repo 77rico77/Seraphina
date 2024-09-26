@@ -57,6 +57,9 @@
 ## Changelog 
 
 The previous changelog can be found [here](docs/changlelog.md).
+- __[2024.09.26]__: Fix 1 for Error: with gr.Row().style(equal_height=False): AttributeError: 'Row' object has no attribute 'style'
+
+- __[2024.09.26]__: Fix 2 Add links for downloading more pretrained model, auido2pose_00140-model.pth and etc for REF  
 
 - __[2023.06.12]__: Added more new features in WebUI extension, see the discussion [here](https://github.com/OpenTalker/SadTalker/discussions/386).
 
@@ -144,6 +147,35 @@ We also provide an offline patch (`gfpgan/`), so no model will be downloaded whe
 * [Google Drive](https://drive.google.com/file/d/1gwWh45pF7aelNP_P78uDJL8Sycep-K7j/view?usp=sharing)
 * [GitHub Releases](https://github.com/OpenTalker/SadTalker/releases)
 * [Baidu (百度云盘)](https://pan.baidu.com/s/1kb1BCPaLOWX1JJb9Czbn6w?pwd=sadt) (Password: `sadt`)
+
+[202409] Fix details:
+  Fix 1: 
+      Error:  with gr.Row().style(equal_height=False): AttributeError: 'Row' object has no attribute 'style'
+        REF: https://github.com/OpenTalker/SadTalker/issues/949 
+             app_sadtalker.zip  Download this patch, and few extra fixes needed with gr.Audio, gr.Video
+
+   Fix 2:
+    No such file or directory: 'checkpoints\\auido2pose_00140-model.pth'
+    REF: https://github.com/Zz-ww/SadTalker-Video-Lip-Sync
+    Download auido2pose_00140-model.pth and etc:
+     百度网盘  https://pan.baidu.com/s/15-zjk64SGQnRT9qIduTe2A   提取码：klfv
+     Google drive：https://drive.google.com/file/d/1lW4mf5YNtS4MAD7ZkAauDDWp2N3_Qzs7/view?usp=sharing
+     夸克网盘：https://pan.quark.cn/s/2a1042b1d046 提取码：zMBP
+├──checkpoints
+|   ├──BFM_Fitting
+|   ├──DAIN_weight
+|   ├──hub
+|   ├──auido2exp_00300-model.pth
+|   ├──auido2pose_00140-model.pth
+|   ├──epoch_20.pth
+|   ├──facevid2vid_00189-model.pth.tar
+|   ├──GFPGANv1.3.pth
+|   ├──GPEN-BFR-512.pth
+|   ├──mapping_00109-model.pth.tar
+|   ├──ParseNet-latest.pth
+|   ├──RetinaFace-R50.pth
+|   ├──shape_predictor_68_face_landmarks.dat
+|   ├──wav2lip.pth
 
 <!-- TODO add Hugging Face links -->
 
