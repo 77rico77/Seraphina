@@ -57,25 +57,8 @@ def sadtalker_demo(checkpoint_path='checkpoints', config_path='src/config', warp
                         gen_video = gr.Video(label="Generated video", format="mp4").style(width=256)
 
         def process_single(source_image, driven_audio, preprocess_type, is_still_mode, enhancer, batch_size, size_of_image, pose_style, expression_scale):
-            working_dir = './working_dir'
-            os.makedirs(working_dir, exist_ok=True)
+            return sad_talker.test(source_image, driven_audio, preprocess_type, is_still_mode, enhancer, batch_size, size_of_image, pose_style, expression_scale)
 
-            # Copy source image to working directory
-            working_image_path = os.path.join(working_dir, os.path.basename(source_image))
-            shutil.copy(source_image, working_image_path)
-
-            # Copy driven audio to working directory
-            working_audio_path = os.path.join(working_dir, os.path.basename(driven_audio))
-            shutil.copy(driven_audio, working_audio_path)
-
-            try:
-                result = sad_talker.test(working_image_path, working_audio_path, preprocess_type, is_still_mode, enhancer, batch_size, size_of_image, pose_style, expression_scale)
-            finally:
-                # Clean up the working directory
-                os.remove(working_image_path)
-                os.remove(working_audio_path)
-
-            return result
 
         def process_batch(image_path, audio_paths, preprocess_type, is_still_mode, enhancer, batch_size, size_of_image, pose_style, expression_scale):
             audio_paths_list = audio_paths.split('\n')
