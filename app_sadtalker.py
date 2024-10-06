@@ -36,6 +36,7 @@ def sadtalker_demo(checkpoint_path='checkpoints', config_path='src/config', warp
                 with gr.Tabs(elem_id="sadtalker_batch_mode"):
                     with gr.TabItem('Batch Mode'):
                         batch_image_path = gr.Textbox(label="Image Path", placeholder="Enter the path for the image")
+                        codeword_image_pairs = gr.Textbox(label="Code Word and Image Paths", lines=5, placeholder="Enter new-line delimited code word and image path pairs, separated by commas")
                         batch_audio_paths = gr.Textbox(label="Audio Paths", lines=5, placeholder="Enter new-line delimited paths for audio files")
 
             with gr.Column(variant='panel'):
@@ -46,8 +47,8 @@ def sadtalker_demo(checkpoint_path='checkpoints', config_path='src/config', warp
                             mode = gr.Radio(['Single Mode', 'Batch Mode'], value='Single Mode', label='Mode')
                             pose_style = gr.Slider(minimum=0, maximum=46, step=1, label="Pose style", value=0)
                             size_of_image = gr.Radio([256, 512], value=256, label='face model resolution', info="use 256/512 model?")
-                            preprocess_type = gr.Radio(['crop', 'resize','full', 'extcrop', 'extfull'], value='crop', label='preprocess', info="How to handle input image?")
-                            is_still_mode = gr.Checkbox(label="Still Mode (fewer head motion, works with preprocess `full`)")
+                            preprocess_type = gr.Radio(['crop', 'resize','full', 'extcrop', 'extfull'], value='full', label='preprocess', info="How to handle input image?")
+                            is_still_mode = gr.Checkbox(label="Still Mode (fewer head motion, works with preprocess `full`)", value=True)
                             batch_size = gr.Slider(label="batch size in generation", step=1, maximum=10, value=2)
                             expression_scale = gr.Slider(label="expression scale", step=0.1, minimum=0, maximum=2, value=1.0)
                             enhancer = gr.Checkbox(label="GFPGAN as Face enhancer")
@@ -60,16 +61,34 @@ def sadtalker_demo(checkpoint_path='checkpoints', config_path='src/config', warp
             return sad_talker.test(source_image, driven_audio, preprocess_type, is_still_mode, enhancer, batch_size, size_of_image, pose_style, expression_scale)
 
 
-        def process_batch(image_path, audio_paths, preprocess_type, is_still_mode, enhancer, batch_size, size_of_image, pose_style, expression_scale):
+        def process_batch(image_path, audio_paths, codeword_image_pairs, preprocess_type, is_still_mode, enhancer, batch_size, size_of_image, pose_style, expression_scale):
+            # Strip double quotes
+            image_path = image_path.replace('"', '')
+            audio_paths = audio_paths.replace('"', '')
+            codeword_image_pairs = codeword_image_pairs.replace('"', '')
+
             audio_paths_list = audio_paths.split('\n')
+            codeword_image_dict = {}
+            for pair in codeword_image_pairs.split('\n'):
+                if ',' in pair:
+                    codeword, img_path = pair.split(',', 1)
+                    codeword_image_dict[codeword] = img_path
+
             videos = []
 
             working_dir = './working_dir'
             os.makedirs(working_dir, exist_ok=True)
 
             for audio_path in audio_paths_list:
-                working_image_path = os.path.join(working_dir, os.path.basename(image_path))
-                shutil.copy(image_path, working_image_path)
+                # Determine the image to use based on the code word
+                selected_image_path = image_path
+                for codeword, img_path in codeword_image_dict.items():
+                    if codeword in audio_path:
+                        selected_image_path = img_path
+                        break
+
+                working_image_path = os.path.join(working_dir, os.path.basename(selected_image_path))
+                shutil.copy(selected_image_path, working_image_path)
                 working_audio_path = os.path.join(working_dir, os.path.basename(audio_path))
                 shutil.copy(audio_path, working_audio_path)
 
@@ -85,16 +104,16 @@ def sadtalker_demo(checkpoint_path='checkpoints', config_path='src/config', warp
 
             return videos
 
-        def handle_submit(mode, source_image, driven_audio, batch_image_path, batch_audio_paths, preprocess_type, is_still_mode, enhancer, batch_size, size_of_image, pose_style, expression_scale):
+        def handle_submit(mode, source_image, driven_audio, batch_image_path, batch_audio_paths, codeword_image_pairs, preprocess_type, is_still_mode, enhancer, batch_size, size_of_image, pose_style, expression_scale):
             if mode == 'Single Mode':
                 return process_single(source_image, driven_audio, preprocess_type, is_still_mode, enhancer, batch_size, size_of_image, pose_style, expression_scale)
             else:
-                return process_batch(batch_image_path, batch_audio_paths, preprocess_type, is_still_mode, enhancer, batch_size, size_of_image, pose_style, expression_scale)
+                return process_batch(batch_image_path, batch_audio_paths, codeword_image_pairs, preprocess_type, is_still_mode, enhancer, batch_size, size_of_image, pose_style, expression_scale)
 
 
         submit.click(
             fn=handle_submit,
-            inputs=[mode, source_image, driven_audio, batch_image_path, batch_audio_paths, preprocess_type, is_still_mode, enhancer, batch_size, size_of_image, pose_style, expression_scale],
+            inputs=[mode, source_image, driven_audio, batch_image_path, batch_audio_paths, codeword_image_pairs, preprocess_type, is_still_mode, enhancer, batch_size, size_of_image, pose_style, expression_scale],
             outputs=[gen_video]
         )
 
