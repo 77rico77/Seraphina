@@ -6,11 +6,10 @@ from src.face3d.models.facerecon_model import FaceReconModel
 import torch
 import subprocess, platform
 import scipy.io as scio
-from tqdm import tqdm 
+from tqdm import tqdm
+import os
 
-# draft
 def gen_composed_video(args, device, first_frame_coeff, coeff_path, audio_path, save_path, exp_dim=64):
-    
     coeff_first = scio.loadmat(first_frame_coeff)['full_3dmm']
 
     coeff_pred = scio.loadmat(coeff_path)['coeff_3dmm']
@@ -24,7 +23,7 @@ def gen_composed_video(args, device, first_frame_coeff, coeff_path, audio_path, 
     tmp_video_path = '/tmp/face3dtmp.mp4'
 
     facemodel = FaceReconModel(args)
-    
+
     video = cv2.VideoWriter(tmp_video_path, cv2.VideoWriter_fourcc(*'mp4v'), 25, (224, 224))
 
     for k in tqdm(range(coeff_pred.shape[0]), 'face3d rendering:'):
@@ -43,6 +42,11 @@ def gen_composed_video(args, device, first_frame_coeff, coeff_path, audio_path, 
 
     video.release()
 
-    command = 'ffmpeg -v quiet -y -i {} -i {} -strict -2 -q:v 1 {}'.format(audio_path, tmp_video_path, save_path)
+    # Extract the base name of the input audio file
+    audio_base_name = os.path.splitext(os.path.basename(audio_path))[0]
+    final_video_path = os.path.join(os.path.dirname(save_path), f"{audio_base_name}.mp4")
+
+    command = 'ffmpeg -v quiet -y -i {} -i {} -strict -2 -q:v 1 {}'.format(audio_path, tmp_video_path, final_video_path)
     subprocess.call(command, shell=platform.system() != 'Windows')
 
+    return final_video_path

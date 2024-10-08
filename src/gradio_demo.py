@@ -1,3 +1,4 @@
+from time import strftime
 import torch, uuid
 import os, sys, shutil
 from src.utils.preprocess import CropAndExtract
@@ -50,8 +51,9 @@ class SadTalker():
         self.preprocess_model = CropAndExtract(self.sadtalker_paths, self.device)
         self.animate_from_coeff = AnimateFromCoeff(self.sadtalker_paths, self.device)
 
-        time_tag = str(uuid.uuid4())
-        save_dir = os.path.join(result_dir, time_tag)
+        audio_input_file_name = os.path.splitext(os.path.basename(driven_audio))[0]
+        time_tag = strftime("%Y-%m-%dT%H.%M.%S")
+        save_dir = os.path.join(result_dir, f"{time_tag}_{audio_input_file_name}")
         os.makedirs(save_dir, exist_ok=True)
 
         input_dir = os.path.join(save_dir, 'input')
