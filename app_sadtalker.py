@@ -32,17 +32,38 @@ def sadtalker_demo(checkpoint_path='checkpoints', config_path='src/config', warp
                     <a style='font-size:18px;color: #efefef' href='https://sadtalker.github.io'>Homepage</a>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; \
                      <a style='font-size:18px;color: #efefef' href='https://github.com/Winfredy/SadTalker'> Github </div>")
         
-        with gr.Row().style(equal_height=False):
+        submit = gr.Button('Generate', elem_id="sadtalker_generate", variant='primary')  # Define the submit button here
+
+        driven_audio = gr.Audio(label="Input audio", type="filepath", elem_id="driven_audio")  # Define the driven_audio variable here
+
+        preprocess_type = gr.Radio(['crop', 'resize','full', 'extcrop', 'extfull'], value='crop', label='preprocess', info="How to handle input image?")  # Define the preprocess_type variable here
+
+        is_still_mode = gr.Checkbox(label="Still Mode (fewer head motion, works with preprocess `full`)", elem_id="is_still_mode")  # Define the is_still_mode variable here
+
+        enhancer = gr.Checkbox(label="GFPGAN as Face enhancer", elem_id="enhancer")  # Define the enhancer variable here
+
+        batch_size = gr.Slider(label="batch size in generation", step=1, maximum=10, value=2, elem_id="batch_size")  # Define the batch_size variable here
+
+        size_of_image = gr.Radio([256, 512], value=256, label='face model resolution', info="use 256/512 model?", elem_id="size_of_image")  # Define the size_of_image variable here
+
+        pose_style = gr.Slider(minimum=0, maximum=46, step=1, label="Pose style", value=0, elem_id="pose_style")  # Define the pose_style variable here
+
+        gen_video = gr.Video(label="Generated video", format="mp4", elem_id="gen_video")  # Define the gen_video variable here
+		
+        #with gr.Row().style(equal_height=False):
+        with gr.Row():
             with gr.Column(variant='panel'):
                 with gr.Tabs(elem_id="sadtalker_source_image"):
                     with gr.TabItem('Upload image'):
                         with gr.Row():
-                            source_image = gr.Image(label="Source image", source="upload", type="filepath", elem_id="img2img_image").style(width=512)
-
+#                            source_image = gr.Image(label="Source image", source="upload", type="filepath", elem_id="img2img_image").style(width=512)
+                            source_image = gr.Image(label="Source image", type="filepath", elem_id="img2img_image")
+							
                 with gr.Tabs(elem_id="sadtalker_driven_audio"):
                     with gr.TabItem('Upload OR TTS'):
                         with gr.Column(variant='panel'):
-                            driven_audio = gr.Audio(label="Input audio", source="upload", type="filepath")
+#                            driven_audio = gr.Audio(label="Input audio", source="upload", type="filepath")
+                            driven_audio = gr.Audio(label="Input audio", type="filepath", elem_id="driven_audio")
 
                         if sys.platform != 'win32' and not in_webui: 
                             from src.utils.text2speech import TTSTalker
@@ -68,7 +89,8 @@ def sadtalker_demo(checkpoint_path='checkpoints', config_path='src/config', warp
                             submit = gr.Button('Generate', elem_id="sadtalker_generate", variant='primary')
                             
                 with gr.Tabs(elem_id="sadtalker_genearted"):
-                        gen_video = gr.Video(label="Generated video", format="mp4").style(width=256)
+#                        gen_video = gr.Video(label="Generated video", format="mp4").style(width=256)
+                        gen_video = gr.Video(label="Generated video", format="mp4")
 
         if warpfn:
             submit.click(
