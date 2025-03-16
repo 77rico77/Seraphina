@@ -40,7 +40,7 @@
 ## Highlights
 
 - The license has been updated to Apache 2.0, and we've removed the non-commercial restriction
-- **SadTalker has now officially been integrated into Discord, where you can use it for free by sending files. You can also generate high-quailty videos from text prompts. Join: [![Discord](https://dcbadge.vercel.app/api/server/rrayYqZ4tf?style=flat)](https://discord.gg/rrayYqZ4tf)**
+- **SadTalker has now officially been integrated into Discord, where you can use it for free by sending files. You can also generate high-quality videos from text prompts. Join: [![Discord](https://dcbadge.vercel.app/api/server/rrayYqZ4tf?style=flat)](https://discord.gg/rrayYqZ4tf)**
 
 - We've published a [stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) extension. Check out more details [here](docs/webui_extension.md). [Demo Video](https://user-images.githubusercontent.com/4397546/231495639-5d4bb925-ea64-4a36-a519-6389917dac29.mp4)
 
@@ -60,13 +60,13 @@ The previous changelog can be found [here](docs/changlelog.md).
 
 - __[2023.06.12]__: Added more new features in WebUI extension, see the discussion [here](https://github.com/OpenTalker/SadTalker/discussions/386).
 
-- __[2023.06.05]__: Released a new 512x512px (beta) face model. Fixed some bugs and improve the performance.
+- __[2023.06.05]__: Released a new 512x512px (beta) face model. Fixed some bugs and improved the performance.
 
 - __[2023.04.15]__: Added a WebUI Colab notebook by [@camenduru](https://github.com/camenduru/): [![sd webui-colab](https://img.shields.io/badge/Automatic1111-Colab-green)](https://colab.research.google.com/github/camenduru/stable-diffusion-webui-colab/blob/main/video/stable/stable_diffusion_1_5_video_webui_colab.ipynb)
 
 - __[2023.04.12]__: Added a more detailed WebUI installation document and fixed a problem when reinstalling.
 
-- __[2023.04.12]__: Fixed the WebUI safe issues becasue of 3rd-party packages, and optimized the output path in `sd-webui-extension`.
+- __[2023.04.12]__: Fixed the WebUI safe issues because of 3rd-party packages, and optimized the output path in `sd-webui-extension`.
 
 - __[2023.04.08]__: In v0.0.2, we added a logo watermark to the generated video to prevent abuse. _This watermark has since been removed in a later release._
 
@@ -181,7 +181,7 @@ Model explains:
 |checkpoints/facevid2vid_00189-model.pth.tar | Pre-trained face-vid2vid model from [the reappearance of face-vid2vid](https://github.com/zhanglonghao1992/One-Shot_Free-View_Neural_Talking_Head_Synthesis).
 |checkpoints/epoch_20.pth | Pre-trained 3DMM extractor in [Deep3DFaceReconstruction](https://github.com/microsoft/Deep3DFaceReconstruction).
 |checkpoints/wav2lip.pth | Highly accurate lip-sync model in [Wav2lip](https://github.com/Rudrabha/Wav2Lip).
-|checkpoints/shape_predictor_68_face_landmarks.dat | Face landmark model used in [dilb](http://dlib.net/). 
+|checkpoints/shape_predictor_68_face_landmarks.dat | Face landmark model used in [dlib](http://dlib.net/). 
 |checkpoints/BFM | 3DMM library file.  
 |checkpoints/hub | Face detection models used in [face alignment](https://github.com/1adrianb/face-alignment).
 |gfpgan/weights | Face detection and enhanced models used in `facexlib` and `gfpgan`.
@@ -203,10 +203,10 @@ Please read our document on [best practices and configuration tips](docs/best_pr
 
 **Local WebUI extension**: Please refer to [WebUI docs](docs/webui_extension.md).
 
-**Local gradio demo (recommanded)**: A Gradio instance similar to our [Hugging Face demo](https://huggingface.co/spaces/vinthony/SadTalker) can be run locally:
+**Local gradio demo (recommended)**: A Gradio instance similar to our [Hugging Face demo](https://huggingface.co/spaces/vinthony/SadTalker) can be run locally:
 
 ```bash
-## you need manually install TTS(https://github.com/coqui-ai/TTS) via `pip install tts` in advanced.
+## you need manually install TTS(https://github.com/coqui-ai/TTS) via `pip install tts` in advance.
 python app_sadtalker.py
 ```
 
@@ -292,7 +292,7 @@ This is not an official product of Tencent.
 LOGO: color and font suggestion: [ChatGPT](https://chat.openai.com), logo font: [Montserrat Alternates
 ](https://fonts.google.com/specimen/Montserrat+Alternates?preview.text=SadTalker&preview.text_type=custom&query=mont).
 
-All the copyrights of the demo images and audio are from community users or the generation from stable diffusion. Feel free to contact us if you would like use to remove them.
+All the copyrights of the demo images and audio are from community users or the generation from stable diffusion. Feel free to contact us if you would like us to remove them.
 
 
 <!-- Spelling fixed on Tuesday, September 12, 2023 by @fakerybakery (https://github.com/fakerybakery). These changes are licensed under the Apache 2.0 license. -->
